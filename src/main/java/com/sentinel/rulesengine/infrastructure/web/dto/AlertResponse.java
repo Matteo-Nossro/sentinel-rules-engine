@@ -13,7 +13,8 @@ public record AlertResponse(
         double value,
         AlertSeverity severity,
         Instant triggeredAt,
-        String message
+        String message,
+        boolean acknowledged
 ) {
     public static AlertResponse from(Alert alert) {
         return new AlertResponse(
@@ -23,7 +24,8 @@ public record AlertResponse(
                 alert.value(),
                 alert.severity(),
                 alert.triggeredAt(),
-                alert.message()
+                alert.message(),
+                alert.acknowledged()
         );
     }
 }

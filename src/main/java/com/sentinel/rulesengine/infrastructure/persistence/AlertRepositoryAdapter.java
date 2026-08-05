@@ -5,6 +5,8 @@ import com.sentinel.rulesengine.domain.port.out.AlertRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class AlertRepositoryAdapter implements AlertRepository {
@@ -25,5 +27,10 @@ public class AlertRepositoryAdapter implements AlertRepository {
     @Override
     public List<Alert> findAll() {
         return mapper.toDomainList(jpaRepository.findAll());
+    }
+
+    @Override
+    public Optional<Alert> findById(UUID id) {
+        return jpaRepository.findById(id).map(mapper::toDomain);
     }
 }

@@ -32,6 +32,10 @@ public class AlertEntity {
     @Column(nullable = false, length = 1000)
     private String message;
 
+    // DEFAULT requis : ddl-auto=update echoue sur colonne NOT NULL si table deja peuplee
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private boolean acknowledged;
+
     public AlertEntity() {}
 
     public UUID getId() { return id; }
@@ -54,4 +58,7 @@ public class AlertEntity {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
+    public boolean isAcknowledged() { return acknowledged; }
+    public void setAcknowledged(boolean acknowledged) { this.acknowledged = acknowledged; }
 }
