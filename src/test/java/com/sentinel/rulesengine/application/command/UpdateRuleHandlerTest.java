@@ -1,6 +1,7 @@
 package com.sentinel.rulesengine.application.command;
 
 import com.sentinel.rulesengine.domain.model.AlertSeverity;
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.Rule;
 import com.sentinel.rulesengine.domain.model.RuleType;
 import com.sentinel.rulesengine.domain.port.out.RuleRepository;
@@ -33,7 +34,7 @@ class UpdateRuleHandlerTest {
 
     private Rule buildRule(UUID id, String name) {
         return new Rule(id, name, UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, AlertSeverity.WARNING, true);
+                RuleType.THRESHOLD, ComparisonOperator.GT, 80.0, null, null, AlertSeverity.WARNING, true);
     }
 
     @Test

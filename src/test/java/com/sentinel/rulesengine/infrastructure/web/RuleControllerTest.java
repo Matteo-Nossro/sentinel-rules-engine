@@ -2,6 +2,7 @@ package com.sentinel.rulesengine.infrastructure.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sentinel.rulesengine.domain.model.AlertSeverity;
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.Rule;
 import com.sentinel.rulesengine.domain.model.RuleType;
 import com.sentinel.rulesengine.domain.port.in.CreateRuleUseCase;
@@ -54,22 +55,23 @@ class RuleControllerTest {
 
     private Rule sampleRule() {
         return new Rule(UUID.randomUUID(), "cpu-alert", UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, AlertSeverity.WARNING, true);
+                RuleType.THRESHOLD, ComparisonOperator.GT, 80.0, null, null, AlertSeverity.WARNING, true);
     }
 
     private RuleRequest validRequest() {
         return new RuleRequest("cpu-alert", UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, AlertSeverity.WARNING, true);
+                RuleType.THRESHOLD, ">", 80.0, null, null, AlertSeverity.WARNING, true);
     }
 
     @Test
     void getAll_shouldReturn200WithRuleList() throws Exception {
         when(getRulesQuery.getAll()).thenReturn(List.of(sampleRule()));
 
-        mockMvc.perform(get("/rules"))
+        mockMvc.perform(get("/rules").header("X-User-Id", "test-user"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("cpu-alert"))
-                .andExpect(jsonPath("$[0].type").value("THRESHOLD"));
+                .andExpect(jsonPath("$[0].type").value("THRESHOLD"))
+                .andExpect(jsonPath("$[0].operator").value(">"));
     }
 
     @Test
@@ -78,6 +80,7 @@ class RuleControllerTest {
         when(createRuleUseCase.create(any())).thenReturn(created);
 
         mockMvc.perform(post("/rules")
+                        .header("X-User-Id", "test-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isCreated())
@@ -87,9 +90,10 @@ class RuleControllerTest {
     @Test
     void create_shouldReturn400WhenNameIsBlank() throws Exception {
         RuleRequest invalid = new RuleRequest("", UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, AlertSeverity.WARNING, true);
+                RuleType.THRESHOLD, ">", 80.0, null, null, AlertSeverity.WARNING, true);
 
         mockMvc.perform(post("/rules")
+                        .header("X-User-Id", "test-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -98,9 +102,10 @@ class RuleControllerTest {
     @Test
     void create_shouldReturn400WhenSeverityIsNull() throws Exception {
         RuleRequest invalid = new RuleRequest("cpu-alert", UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, null, true);
+                RuleType.THRESHOLD, ">", 80.0, null, null, null, true);
 
         mockMvc.perform(post("/rules")
+                        .header("X-User-Id", "test-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -109,9 +114,10 @@ class RuleControllerTest {
     @Test
     void create_shouldReturn400WhenMetricNameIsBlank() throws Exception {
         RuleRequest invalid = new RuleRequest("cpu-alert", UUID.randomUUID(), "",
-                RuleType.THRESHOLD, 80.0, null, null, AlertSeverity.WARNING, true);
+                RuleType.THRESHOLD, ">", 80.0, null, null, AlertSeverity.WARNING, true);
 
         mockMvc.perform(post("/rules")
+                        .header("X-User-Id", "test-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -121,24 +127,32 @@ class RuleControllerTest {
     void update_shouldReturn200WithUpdatedRule() throws Exception {
         UUID id = UUID.randomUUID();
         Rule updated = new Rule(id, "cpu-alert-critical", UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 90.0, null, null, AlertSeverity.CRITICAL, true);
+                RuleType.THRESHOLD, ComparisonOperator.GTE, 90.0, null, null, AlertSeverity.CRITICAL, true);
         when(updateRuleUseCase.update(any(), any())).thenReturn(updated);
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/rules/{id}", id)
+                        .header("X-User-Id", "test-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("cpu-alert-critical"))
-                .andExpect(jsonPath("$.severity").value("CRITICAL"));
+                .andExpect(jsonPath("$.severity").value("CRITICAL"))
+                .andExpect(jsonPath("$.operator").value(">="));
     }
 
     @Test
     void delete_shouldReturn204AndCallUseCase() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/rules/{id}", id))
+        mockMvc.perform(delete("/rules/{id}", id).header("X-User-Id", "test-user"))
                 .andExpect(status().isNoContent());
 
         verify(deleteRuleUseCase).delete(id);
+    }
+
+    @Test
+    void getAll_shouldReturn401WhenUserIdHeaderMissing() throws Exception {
+        mockMvc.perform(get("/rules"))
+                .andExpect(status().isUnauthorized());
     }
 }

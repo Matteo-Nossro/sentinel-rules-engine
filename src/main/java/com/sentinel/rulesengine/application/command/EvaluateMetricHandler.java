@@ -1,6 +1,7 @@
 package com.sentinel.rulesengine.application.command;
 
 import com.sentinel.rulesengine.domain.model.Alert;
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.Rule;
 import com.sentinel.rulesengine.domain.port.in.EvaluateMetricUseCase;
 import com.sentinel.rulesengine.domain.port.out.AlertEventPublisher;
@@ -37,8 +38,9 @@ public class EvaluateMetricHandler implements EvaluateMetricUseCase {
 
         for (Rule rule : activeRules) {
             if (evaluationService.evaluate(rule, value)) {
-                String message = String.format("Rule '%s' triggered: %.2f > %.2f", rule.name(), value, rule.threshold());
-                Alert alert = new Alert(UUID.randomUUID(), rule.id(), sourceId, value, rule.severity(), Instant.now(), message);
+                ComparisonOperator operator = rule.operator() != null ? rule.operator() : ComparisonOperator.GT;
+                String message = String.format("Rule '%s' triggered: %.2f %s %.2f", rule.name(), value, operator.symbol(), rule.threshold());
+                Alert alert = new Alert(UUID.randomUUID(), rule.id(), sourceId, value, rule.severity(), Instant.now(), message, false);
                 alertRepository.save(alert);
                 alertEventPublisher.publish(alert);
             }

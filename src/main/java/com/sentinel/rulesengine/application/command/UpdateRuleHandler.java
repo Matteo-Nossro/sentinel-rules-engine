@@ -23,7 +23,7 @@ public class UpdateRuleHandler implements UpdateRuleUseCase {
                 .orElseThrow(() -> new NoSuchElementException("Rule not found: " + id));
 
         Rule toSave = new Rule(id, rule.name(), rule.sourceId(), rule.metricName(),
-                rule.type(), rule.threshold(), rule.windowSize(),
+                rule.type(), rule.operator(), rule.threshold(), rule.windowSize(),
                 rule.frequency(), rule.severity(), rule.active());
 
         return ruleRepository.save(toSave);

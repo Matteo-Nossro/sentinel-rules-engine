@@ -1,5 +1,6 @@
 package com.sentinel.rulesengine.infrastructure.web;
 
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.Rule;
 import com.sentinel.rulesengine.domain.port.in.CreateRuleUseCase;
 import com.sentinel.rulesengine.domain.port.in.DeleteRuleUseCase;
@@ -60,8 +61,11 @@ public class RuleController {
         Duration windowSize = request.windowSizeSeconds() != null
                 ? Duration.ofSeconds(request.windowSizeSeconds())
                 : null;
+        ComparisonOperator operator = request.operator() != null
+                ? ComparisonOperator.fromSymbol(request.operator())
+                : null;
         return new Rule(id, request.name(), request.sourceId(), request.metricName(),
-                request.type(), request.threshold(), windowSize,
+                request.type(), operator, request.threshold(), windowSize,
                 request.frequency(), request.severity(), request.active());
     }
 }

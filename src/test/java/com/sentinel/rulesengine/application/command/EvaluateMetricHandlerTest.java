@@ -2,6 +2,7 @@ package com.sentinel.rulesengine.application.command;
 
 import com.sentinel.rulesengine.domain.model.Alert;
 import com.sentinel.rulesengine.domain.model.AlertSeverity;
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.Rule;
 import com.sentinel.rulesengine.domain.model.RuleType;
 import com.sentinel.rulesengine.domain.port.out.AlertEventPublisher;
@@ -43,7 +44,7 @@ class EvaluateMetricHandlerTest {
 
     private Rule buildRule(UUID sourceId, AlertSeverity severity) {
         return new Rule(UUID.randomUUID(), "cpu-alert", sourceId, "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, severity, true);
+                RuleType.THRESHOLD, ComparisonOperator.GT, 80.0, null, null, severity, true);
     }
 
     @Test

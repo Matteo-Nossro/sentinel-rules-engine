@@ -1,6 +1,7 @@
 package com.sentinel.rulesengine.infrastructure.persistence.entity;
 
 import com.sentinel.rulesengine.domain.model.AlertSeverity;
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.RuleType;
 import jakarta.persistence.*;
 
@@ -25,6 +26,9 @@ public class RuleEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RuleType type;
+
+    @Enumerated(EnumType.STRING)
+    private ComparisonOperator operator;
 
     private Double threshold;
 
@@ -56,6 +60,9 @@ public class RuleEntity {
 
     public RuleType getType() { return type; }
     public void setType(RuleType type) { this.type = type; }
+
+    public ComparisonOperator getOperator() { return operator; }
+    public void setOperator(ComparisonOperator operator) { this.operator = operator; }
 
     public Double getThreshold() { return threshold; }
     public void setThreshold(Double threshold) { this.threshold = threshold; }

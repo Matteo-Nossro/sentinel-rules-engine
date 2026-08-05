@@ -1,6 +1,7 @@
 package com.sentinel.rulesengine.application.command;
 
 import com.sentinel.rulesengine.domain.model.AlertSeverity;
+import com.sentinel.rulesengine.domain.model.ComparisonOperator;
 import com.sentinel.rulesengine.domain.model.Rule;
 import com.sentinel.rulesengine.domain.model.RuleType;
 import com.sentinel.rulesengine.domain.port.out.RuleRepository;
@@ -29,7 +30,7 @@ class CreateRuleHandlerTest {
 
     private Rule inputRule() {
         return new Rule(null, "cpu-alert", UUID.randomUUID(), "cpu_usage",
-                RuleType.THRESHOLD, 80.0, null, null, AlertSeverity.WARNING, true);
+                RuleType.THRESHOLD, ComparisonOperator.GT, 80.0, null, null, AlertSeverity.WARNING, true);
     }
 
     @Test
@@ -48,7 +49,7 @@ class CreateRuleHandlerTest {
     void create_shouldPreserveAllFieldsExceptId() {
         UUID sourceId = UUID.randomUUID();
         Rule input = new Rule(null, "mem-alert", sourceId, "memory_rss",
-                RuleType.THRESHOLD, 90.0, null, null, AlertSeverity.CRITICAL, false);
+                RuleType.THRESHOLD, ComparisonOperator.GT, 90.0, null, null, AlertSeverity.CRITICAL, false);
         when(ruleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         handler.create(input);
@@ -68,7 +69,7 @@ class CreateRuleHandlerTest {
     void create_shouldReturnSavedRule() {
         Rule input = inputRule();
         Rule persisted = new Rule(UUID.randomUUID(), input.name(), input.sourceId(), input.metricName(),
-                input.type(), input.threshold(), null, null, input.severity(), input.active());
+                input.type(), input.operator(), input.threshold(), null, null, input.severity(), input.active());
         when(ruleRepository.save(any())).thenReturn(persisted);
 
         Rule result = handler.create(input);

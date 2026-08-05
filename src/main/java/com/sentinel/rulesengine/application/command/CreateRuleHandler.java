@@ -24,6 +24,7 @@ public class CreateRuleHandler implements CreateRuleUseCase {
                 rule.sourceId(),
                 rule.metricName(),
                 rule.type(),
+                rule.operator(),
                 rule.threshold(),
                 rule.windowSize(),
                 rule.frequency(),
